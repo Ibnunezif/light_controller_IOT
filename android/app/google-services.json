@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1094029279602",
+    "firebase_url": "https://light-controller-11de7-default-rtdb.firebaseio.com",
+    "project_id": "light-controller-11de7",
+    "storage_bucket": "light-controller-11de7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1094029279602:android:3f5227300c748c53aaddeb",
+        "android_client_info": {
+          "package_name": "com.example.light_controller_iot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRnav4EeLyfnsFmUG8uhNaLXkvAf_qdY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
