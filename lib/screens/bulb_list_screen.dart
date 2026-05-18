@@ -3,6 +3,7 @@ import '../models/bulb.dart';
 import '../models/language.dart';
 import '../services/localization_service.dart';
 import '../services/firebase_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/bulb_card.dart';
 import '../widgets/language_selector.dart';
 import 'bulb_control_screen.dart';
@@ -22,7 +23,8 @@ class BulbListScreen extends StatefulWidget {
 }
 
 class _BulbListScreenState extends State<BulbListScreen> {
-  final FirebaseService _firebaseService = FirebaseService();
+  final AppFirebaseService _firebaseService = AppFirebaseService();
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,11 @@ class _BulbListScreenState extends State<BulbListScreen> {
         elevation: 0,
         actions: [
           LanguageSelector(onLanguageChanged: widget.onLanguageChanged),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _authService.signOut(),
+            tooltip: 'Logout',
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -96,7 +103,7 @@ class _BulbListScreenState extends State<BulbListScreen> {
                         padding: const EdgeInsets.only(right: 20),
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.8),
+                          color: Colors.redAccent.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(Icons.delete, color: Colors.white),
@@ -139,7 +146,7 @@ class _BulbListScreenState extends State<BulbListScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.deepPurpleAccent.withOpacity(0.8), Colors.deepPurple.withOpacity(0.6)],
+          colors: [Colors.deepPurpleAccent.withValues(alpha: 0.8), Colors.deepPurple.withValues(alpha: 0.6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -179,7 +186,7 @@ class _BulbListScreenState extends State<BulbListScreen> {
 
         return Container(
           width: double.infinity,
-          color: Colors.orangeAccent.withOpacity(0.2),
+          color: Colors.orangeAccent.withValues(alpha: 0.2),
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,

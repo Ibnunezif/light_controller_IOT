@@ -26,12 +26,12 @@ class BulbToggleButton extends StatelessWidget {
           boxShadow: isOn
               ? [
                   BoxShadow(
-                    color: Colors.deepPurpleAccent.withOpacity(0.3 * brightness),
+                    color: Colors.deepPurpleAccent.withValues(alpha: 0.3 * brightness),
                     blurRadius: 50,
                     spreadRadius: 20,
                   ),
                   BoxShadow(
-                    color: Colors.deepPurpleAccent.withOpacity(0.1 * brightness),
+                    color: Colors.deepPurpleAccent.withValues(alpha: 0.1 * brightness),
                     blurRadius: 100,
                     spreadRadius: 40,
                   ),
@@ -43,7 +43,7 @@ class BulbToggleButton extends StatelessWidget {
             isOn ? Icons.lightbulb : Icons.lightbulb_outline,
             size: 80,
             color: isOn
-                ? Colors.white.withOpacity(0.5 + (brightness * 0.5))
+                ? Colors.white.withValues(alpha: 0.5 + (brightness * 0.5))
                 : Colors.white24,
           ),
         ),

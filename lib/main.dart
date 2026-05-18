@@ -18,11 +18,6 @@ void main() async {
     FirebaseDatabase.instance.setPersistenceEnabled(true);
     
     runApp(const MyApp());
-
-    // Run seeding in the background without 'await' to avoid blocking the UI
-    FirebaseService().seedDatabase().catchError((e) {
-      debugPrint('Background seeding failed: $e');
-    });
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
     runApp(const MyApp()); // Still run the app even if Firebase fails

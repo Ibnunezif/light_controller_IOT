@@ -17,7 +17,7 @@ class BulbControlScreen extends StatefulWidget {
 }
 
 class _BulbControlScreenState extends State<BulbControlScreen> {
-  final FirebaseService _firebaseService = FirebaseService();
+  final AppFirebaseService _firebaseService = AppFirebaseService();
   late Bulb _currentBulb;
 
   @override
@@ -109,7 +109,7 @@ class _BulbControlScreenState extends State<BulbControlScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 40),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(

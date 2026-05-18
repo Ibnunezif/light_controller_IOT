@@ -1,10 +1,20 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/bulb.dart';
 
-class FirebaseService {
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref('bulbs');
+class AppFirebaseService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  FirebaseService();
+  AppFirebaseService();
+
+  String get _uid {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+    return user.uid;
+  }
+
+  DatabaseReference get _userBulbsRef => 
+      FirebaseDatabase.instance.ref('users/$_uid/bulbs');
 
   Stream<bool> get connectionStream {
     return FirebaseDatabase.instance.ref('.info/connected').onValue.map((event) {
@@ -14,15 +24,12 @@ class FirebaseService {
 
   Stream<List<Bulb>> getBulbsStream() {
     try {
-      return _dbRef.onValue.map((event) {
+      return _userBulbsRef.onValue.map((event) {
         final Map<dynamic, dynamic>? data = event.snapshot.value as Map<dynamic, dynamic>?;
         if (data == null) return [];
 
         return data.entries.map((entry) {
-          final bulb = Bulb.fromMap(entry.key.toString(), entry.value as Map<dynamic, dynamic>);
-          // If bulb is ON, we might want to calculate current session consumption
-          // but for simplicity we'll update it on state changes.
-          return bulb;
+          return Bulb.fromMap(entry.key.toString(), entry.value as Map<dynamic, dynamic>);
         }).toList();
       });
     } catch (e) {
@@ -31,7 +38,7 @@ class FirebaseService {
   }
 
   Future<void> addBulb(String name, double ratedWattage) async {
-    final newBulbRef = _dbRef.push();
+    final newBulbRef = _userBulbsRef.push();
     final int now = DateTime.now().millisecondsSinceEpoch;
     final newBulb = Bulb(
       id: newBulbRef.key!,
@@ -52,20 +59,17 @@ class FirebaseService {
     double totalConsumed = bulb.totalConsumed;
 
     if (bulb.isOn) {
-      // It was ON, now turning OFF (or just updating). Calculate consumed since lastUpdate.
       final double hours = (now - bulb.lastUpdate) / (1000 * 60 * 60);
       final double consumed = (bulb.instantUsage * hours) / 1000;
       totalConsumed += consumed;
     }
 
-    bulb.isOn = isOn;
-    final double instantUsage = bulb.calculateCurrentWattage();
-    final double dailyUsage = bulb.estimateDailyUsage();
+    final double instantUsage = bulb.calculateCurrentWattage(isOn: isOn);
+    // Note: You might want to update dailyUsage estimation logic too
 
-    await _dbRef.child(bulb.id).update({
+    await _userBulbsRef.child(bulb.id).update({
       'isOn': isOn,
       'instantUsage': instantUsage,
-      'dailyUsage': dailyUsage,
       'totalConsumed': totalConsumed,
       'lastUpdate': now,
     });
@@ -83,23 +87,25 @@ class FirebaseService {
 
     bulb.brightness = brightness;
     final double instantUsage = bulb.calculateCurrentWattage();
-    final double dailyUsage = bulb.estimateDailyUsage();
 
-    await _dbRef.child(bulb.id).update({
+    await _userBulbsRef.child(bulb.id).update({
       'brightness': brightness,
       'instantUsage': instantUsage,
-      'dailyUsage': dailyUsage,
       'totalConsumed': totalConsumed,
       'lastUpdate': now,
     });
   }
 
   Future<void> deleteBulb(String id) async {
-    await _dbRef.child(id).remove();
+    await _userBulbsRef.child(id).remove();
   }
 
   Future<void> seedDatabase() async {
-    final snapshot = await _dbRef.get();
+    // Only seed if user is logged in
+    User? user = _auth.currentUser;
+    if (user == null) return;
+
+    final snapshot = await _userBulbsRef.get();
     if (!snapshot.exists || snapshot.value == null) {
       final initialBulbs = {
         'bulb_1': {
@@ -108,6 +114,9 @@ class FirebaseService {
           'brightness': 0.8,
           'dailyUsage': 1.25,
           'instantUsage': 12.5,
+          'ratedWattage': 15.0,
+          'totalConsumed': 0.0,
+          'lastUpdate': DateTime.now().millisecondsSinceEpoch,
         },
         'bulb_2': {
           'name': 'Kitchen Counter',
@@ -115,16 +124,12 @@ class FirebaseService {
           'brightness': 0.5,
           'dailyUsage': 0.85,
           'instantUsage': 0.0,
-        },
-        'bulb_3': {
-          'name': 'Master Bedroom',
-          'isOn': true,
-          'brightness': 0.3,
-          'dailyUsage': 0.45,
-          'instantUsage': 5.2,
+          'ratedWattage': 10.0,
+          'totalConsumed': 0.0,
+          'lastUpdate': DateTime.now().millisecondsSinceEpoch,
         },
       };
-      await _dbRef.set(initialBulbs);
+      await _userBulbsRef.set(initialBulbs);
     }
   }
 }
